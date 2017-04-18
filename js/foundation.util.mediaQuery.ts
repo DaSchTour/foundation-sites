@@ -1,5 +1,7 @@
-// Default set of media queries
+import * as $ from "jquery";
 import { Foundation } from "./foundation.core";
+// Default set of media queries
+
 export const defaultQueries = {
   'default' : 'only screen',
   landscape : 'only screen and (orientation: landscape)',
@@ -12,17 +14,17 @@ export const defaultQueries = {
     'only screen and (min-resolution: 2dppx)'
 };
 
-export const MediaQuery = {
-  queries: [],
+export class MediaQuery {
+  public static queries = [];
 
-  current: '',
+  public static current = '';
 
   /**
    * Initializes the media query helper, by extracting the breakpoint list from the CSS and activating the breakpoint watcher.
    * @function
    * @private
    */
-  _init() {
+  public static init() {
     var self = this;
     var extractedStyles = $('.foundation-mq').css('font-family');
     var namedQueries;
@@ -41,7 +43,7 @@ export const MediaQuery = {
     this.current = this._getCurrentSize();
 
     this._watcher();
-  },
+  }
 
   /**
    * Checks if the screen is at least as wide as a breakpoint.
@@ -49,7 +51,7 @@ export const MediaQuery = {
    * @param {String} size - Name of the breakpoint to check.
    * @returns {Boolean} `true` if the breakpoint matches, `false` if it's smaller.
    */
-  atLeast(size) {
+  public static atLeast(size) {
     var query = this.get(size);
 
     if (query) {
@@ -57,7 +59,7 @@ export const MediaQuery = {
     }
 
     return false;
-  },
+  }
 
   /**
    * Checks if the screen matches to a breakpoint.
@@ -65,7 +67,7 @@ export const MediaQuery = {
    * @param {String} size - Name of the breakpoint to check, either 'small only' or 'small'. Omitting 'only' falls back to using atLeast() method.
    * @returns {Boolean} `true` if the breakpoint matches, `false` if it does not.
    */
-  is(size) {
+  public static is(size) {
     size = size.trim().split(' ');
     if(size.length > 1 && size[1] === 'only') {
       if(size[0] === this._getCurrentSize()) return true;
@@ -81,7 +83,7 @@ export const MediaQuery = {
    * @param {String} size - Name of the breakpoint to get.
    * @returns {String|null} - The media query of the breakpoint, or `null` if the breakpoint doesn't exist.
    */
-  get(size) {
+  public static get(size) {
     for (var i in this.queries) {
       if(this.queries.hasOwnProperty(i)) {
         var query = this.queries[i];
@@ -90,7 +92,7 @@ export const MediaQuery = {
     }
 
     return null;
-  },
+  }
 
   /**
    * Gets the current breakpoint name by testing every breakpoint and returning the last one to match (the biggest one).
@@ -98,7 +100,7 @@ export const MediaQuery = {
    * @private
    * @returns {String} Name of the current breakpoint.
    */
-  _getCurrentSize() {
+  private static _getCurrentSize() {
     var matched;
 
     for (var i = 0; i < this.queries.length; i++) {
@@ -114,14 +116,14 @@ export const MediaQuery = {
     } else {
       return matched;
     }
-  },
+  }
 
   /**
    * Activates the breakpoint watcher, which fires an event on the window whenever the breakpoint changes.
    * @function
    * @private
    */
-  _watcher() {
+  private static _watcher() {
     $(window).on('resize.zf.mediaquery', () => {
       var newSize = this._getCurrentSize(), currentSize = this.current;
 
@@ -135,8 +137,6 @@ export const MediaQuery = {
     });
   }
 };
-
-Foundation.MediaQuery = MediaQuery;
 
 // matchMedia() polyfill - Test a CSS media type/query in JS.
 // Authors & copyright (c) 2012: Scott Jehl, Paul Irish, Nicholas Zakas, David Knight. Dual MIT/BSD license
@@ -222,5 +222,5 @@ function parseStyleToObject(str) {
   return styleObject;
 }
 
-Foundation.MediaQuery = MediaQuery;
+Foundation["MediaQuery"] = MediaQuery;
 

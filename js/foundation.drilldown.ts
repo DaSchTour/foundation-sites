@@ -1,6 +1,14 @@
-'use strict';
+import * as $ from "jquery";
+import { Keyboard } from "./foundation.util.keyboard";
+import { Foundation, FoundationPlugin } from "./foundation.core";
+import { Nest } from "./foundation.util.nest";
 
-!function($) {
+export interface DrilldownOptions {
+  backButton?: string;
+  wrapper?: string;
+  parentLink?: boolean;
+  closeOnClick?: boolean;
+}
 
 /**
  * Drilldown module.
@@ -10,7 +18,9 @@
  * @requires foundation.util.nest
  */
 
-class Drilldown {
+export class Drilldown implements FoundationPlugin {
+  public $element: JQuery;
+  private options: DrilldownOptions;
   /**
    * Creates a new instance of a drilldown menu.
    * @class
@@ -21,12 +31,12 @@ class Drilldown {
     this.$element = element;
     this.options = $.extend({}, Drilldown.defaults, this.$element.data(), options);
 
-    Foundation.Nest.Feather(this.$element, 'drilldown');
+    Nest.Feather(this.$element, 'drilldown');
 
     this._init();
 
     Foundation.registerPlugin(this, 'Drilldown');
-    Foundation.Keyboard.register('Drilldown', {
+    Keyboard.register('Drilldown', {
       'ENTER': 'open',
       'SPACE': 'open',
       'ARROW_RIGHT': 'next',
@@ -400,7 +410,7 @@ class Drilldown {
   destroy() {
     if(this.options.scrollTop) this.$element.off('.zf.drilldown',this._bindHandler);
     this._hideAll();
-	  this.$element.off('mutateme.zf.trigger');
+    this.$element.off('mutateme.zf.trigger');
     Foundation.Nest.Burn(this.$element, 'drilldown');
     this.$element.unwrap()
                  .find('.js-drilldown-back, .is-submenu-parent-item').remove()
@@ -420,99 +430,97 @@ class Drilldown {
       }else{ return; }
     });
     Foundation.unregisterPlugin(this);
-  };
+  }
+  public static defaults = {
+    /**
+     * Markup used for JS generated back button. Prepended  or appended (see backButtonPosition) to submenu lists and deleted on `destroy` method, 'js-drilldown-back' class required. Remove the backslash (`\`) if copy and pasting.
+     * @option
+     * @type {string}
+     * @default '<li class="js-drilldown-back"><a tabindex="0">Back</a></li>'
+     */
+    backButton: '<li class="js-drilldown-back"><a tabindex="0">Back</a></li>',
+    /**
+     * Position the back button either at the top or bottom of drilldown submenus. Can be `'left'` or `'bottom'`.
+     * @option
+     * @type {string}
+     * @default top
+     */
+    backButtonPosition: 'top',
+    /**
+     * Markup used to wrap drilldown menu. Use a class name for independent styling; the JS applied class: `is-drilldown` is required. Remove the backslash (`\`) if copy and pasting.
+     * @option
+     * @type {string}
+     * @default '<div></div>'
+     */
+    wrapper: '<div></div>',
+    /**
+     * Adds the parent link to the submenu.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    parentLink: false,
+    /**
+     * Allow the menu to return to root list on body click.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    closeOnClick: false,
+    /**
+     * Allow the menu to auto adjust height.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    autoHeight: false,
+    /**
+     * Animate the auto adjust height.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    animateHeight: false,
+    /**
+     * Scroll to the top of the menu after opening a submenu or navigating back using the menu back button
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    scrollTop: false,
+    /**
+     * String jquery selector (for example 'body') of element to take offset().top from, if empty string the drilldown menu offset().top is taken
+     * @option
+     * @type {string}
+     * @default ''
+     */
+    scrollTopElement: '',
+    /**
+     * ScrollTop offset
+     * @option
+     * @type {number}
+     * @default 0
+     */
+    scrollTopOffset: 0,
+    /**
+     * Scroll animation duration
+     * @option
+     * @type {number}
+     * @default 500
+     */
+    animationDuration: 500,
+    /**
+     * Scroll animation easing. Can be `'swing'` or `'linear'`.
+     * @option
+     * @type {string}
+     * @see {@link https://api.jquery.com/animate|JQuery animate}
+     * @default 'swing'
+     */
+    animationEasing: 'swing'
+    // holdOpen: false
+  }
 }
-
-Drilldown.defaults = {
-  /**
-   * Markup used for JS generated back button. Prepended  or appended (see backButtonPosition) to submenu lists and deleted on `destroy` method, 'js-drilldown-back' class required. Remove the backslash (`\`) if copy and pasting.
-   * @option
-   * @type {string}
-   * @default '<li class="js-drilldown-back"><a tabindex="0">Back</a></li>'
-   */
-  backButton: '<li class="js-drilldown-back"><a tabindex="0">Back</a></li>',
-  /**
-   * Position the back button either at the top or bottom of drilldown submenus. Can be `'left'` or `'bottom'`.
-   * @option
-   * @type {string}
-   * @default top
-   */
-  backButtonPosition: 'top',
-  /**
-   * Markup used to wrap drilldown menu. Use a class name for independent styling; the JS applied class: `is-drilldown` is required. Remove the backslash (`\`) if copy and pasting.
-   * @option
-   * @type {string}
-   * @default '<div></div>'
-   */
-  wrapper: '<div></div>',
-  /**
-   * Adds the parent link to the submenu.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  parentLink: false,
-  /**
-   * Allow the menu to return to root list on body click.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  closeOnClick: false,
-  /**
-   * Allow the menu to auto adjust height.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  autoHeight: false,
-  /**
-   * Animate the auto adjust height.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  animateHeight: false,
-  /**
-   * Scroll to the top of the menu after opening a submenu or navigating back using the menu back button
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  scrollTop: false,
-  /**
-   * String jquery selector (for example 'body') of element to take offset().top from, if empty string the drilldown menu offset().top is taken
-   * @option
-   * @type {string}
-   * @default ''
-   */
-  scrollTopElement: '',
-  /**
-   * ScrollTop offset
-   * @option
-   * @type {number}
-   * @default 0
-   */
-  scrollTopOffset: 0,
-  /**
-   * Scroll animation duration
-   * @option
-   * @type {number}
-   * @default 500
-   */
-  animationDuration: 500,
-  /**
-   * Scroll animation easing. Can be `'swing'` or `'linear'`.
-   * @option
-   * @type {string}
-   * @see {@link https://api.jquery.com/animate|JQuery animate}
-   * @default 'swing'
-   */
-  animationEasing: 'swing'
-  // holdOpen: false
-};
 
 // Window exports
 Foundation.plugin(Drilldown, 'Drilldown');
 
-}(jQuery);

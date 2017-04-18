@@ -1,6 +1,14 @@
-'use strict';
+import * as $ from "jquery";
+import { Foundation, FoundationPlugin } from "./foundation.core";
+import { Keyboard } from "./foundation.util.keyboard";
 
-!function($) {
+export interface TabsOptions {
+  autoFocus?: boolean;
+  wrapOnKeys?: boolean;
+  matchHeight?: boolean;
+  linkClass?: string;
+  panelClass?: string;
+}
 
 /**
  * Tabs module.
@@ -9,7 +17,10 @@
  * @requires foundation.util.timerAndImageLoader if tabs contain images
  */
 
-class Tabs {
+export class Tabs implements FoundationPlugin {
+  public $element: JQuery;
+  private options: TabsOptions;
+  private _checkDeepLink: Function;
   /**
    * Creates a new instance of tabs.
    * @class
@@ -23,7 +34,7 @@ class Tabs {
 
     this._init();
     Foundation.registerPlugin(this, 'Tabs');
-    Foundation.Keyboard.register('Tabs', {
+    Keyboard.register('Tabs', {
       'ENTER': 'open',
       'SPACE': 'open',
       'ARROW_RIGHT': 'next',
@@ -185,7 +196,7 @@ class Tabs {
       });
 
       // handle keyboard event with keyboard util
-      Foundation.Keyboard.handleKey(e, 'Tabs', {
+      Keyboard.handleKey(e, 'Tabs', {
         open: function() {
           $element.find('[role="tab"]').focus();
           _this._handleTabChange($element);
@@ -383,108 +394,105 @@ class Tabs {
 
     Foundation.unregisterPlugin(this);
   }
+  public static defaults = {
+    /**
+     * Allows the window to scroll to content of pane specified by hash anchor
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    deepLink: false,
+
+    /**
+     * Adjust the deep link scroll to make sure the top of the tab panel is visible
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    deepLinkSmudge: false,
+
+    /**
+     * Animation time (ms) for the deep link adjustment
+     * @option
+     * @type {number}
+     * @default 300
+     */
+    deepLinkSmudgeDelay: 300,
+
+    /**
+     * Update the browser history with the open tab
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    updateHistory: false,
+
+    /**
+     * Allows the window to scroll to content of active pane on load if set to true.
+     * Not recommended if more than one tab panel per page.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    autoFocus: false,
+
+    /**
+     * Allows keyboard input to 'wrap' around the tab links.
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    wrapOnKeys: true,
+
+    /**
+     * Allows the tab content panes to match heights if set to true.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    matchHeight: false,
+
+    /**
+     * Allows active tabs to collapse when clicked.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    activeCollapse: false,
+
+    /**
+     * Class applied to `li`'s in tab link list.
+     * @option
+     * @type {string}
+     * @default 'tabs-title'
+     */
+    linkClass: 'tabs-title',
+
+    /**
+     * Class applied to the active `li` in tab link list.
+     * @option
+     * @type {string}
+     * @default 'is-active'
+     */
+    linkActiveClass: 'is-active',
+
+    /**
+     * Class applied to the content containers.
+     * @option
+     * @type {string}
+     * @default 'tabs-panel'
+     */
+    panelClass: 'tabs-panel',
+
+    /**
+     * Class applied to the active content container.
+     * @option
+     * @type {string}
+     * @default 'is-active'
+     */
+    panelActiveClass: 'is-active'
+  }
 }
-
-Tabs.defaults = {
-  /**
-   * Allows the window to scroll to content of pane specified by hash anchor
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  deepLink: false,
-
-  /**
-   * Adjust the deep link scroll to make sure the top of the tab panel is visible
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  deepLinkSmudge: false,
-
-  /**
-   * Animation time (ms) for the deep link adjustment
-   * @option
-   * @type {number}
-   * @default 300
-   */
-  deepLinkSmudgeDelay: 300,
-
-  /**
-   * Update the browser history with the open tab
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  updateHistory: false,
-
-  /**
-   * Allows the window to scroll to content of active pane on load if set to true.
-   * Not recommended if more than one tab panel per page.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  autoFocus: false,
-
-  /**
-   * Allows keyboard input to 'wrap' around the tab links.
-   * @option
-   * @type {boolean}
-   * @default true
-   */
-  wrapOnKeys: true,
-
-  /**
-   * Allows the tab content panes to match heights if set to true.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  matchHeight: false,
-
-  /**
-   * Allows active tabs to collapse when clicked.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  activeCollapse: false,
-
-  /**
-   * Class applied to `li`'s in tab link list.
-   * @option
-   * @type {string}
-   * @default 'tabs-title'
-   */
-  linkClass: 'tabs-title',
-
-  /**
-   * Class applied to the active `li` in tab link list.
-   * @option
-   * @type {string}
-   * @default 'is-active'
-   */
-  linkActiveClass: 'is-active',
-
-  /**
-   * Class applied to the content containers.
-   * @option
-   * @type {string}
-   * @default 'tabs-panel'
-   */
-  panelClass: 'tabs-panel',
-
-  /**
-   * Class applied to the active content container.
-   * @option
-   * @type {string}
-   * @default 'is-active'
-   */
-  panelActiveClass: 'is-active'
-};
 
 // Window exports
 Foundation.plugin(Tabs, 'Tabs');
-
-}(jQuery);

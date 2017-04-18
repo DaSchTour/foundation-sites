@@ -1,3 +1,5 @@
+import * as $ from "jquery";
+import { MediaQuery } from "./foundation.util.mediaQuery";
 export const FOUNDATION_VERSION = '6.3.1';
 
 export interface FoundationPlugin {
@@ -151,7 +153,7 @@ export const Foundation = {
    * @param {Object} elem - jQuery object containing the element to check inside. Also checks the element itself, unless it's the `document` object.
    * @param {String|Array} plugins - A list of plugins to initialize. Leave this out to initialize everything.
    */
-  reflow: function(elem, plugins) {
+  reflow: function(elem, plugins?) {
 
     // If plugins is undefined, just grab everything
     if (typeof plugins === 'undefined') {
@@ -165,9 +167,9 @@ export const Foundation = {
     var _this = this;
 
     // Iterate through each plugin
-    $.each(plugins, function(i, name) {
+    $.each(plugins, (i, name) => {
       // Get the current plugin
-      var plugin = _this._plugins[name];
+      var plugin = this._plugins[name];
 
       // Localize the search to all elements inside elem, as well as elem itself, unless elem === document
       var $elem = $(elem).find('[data-'+name+']').addBack('[data-'+name+']');
@@ -267,7 +269,7 @@ const foundation = function(method) {
   }
 
   if(type === 'undefined'){//needs to initialize the Foundation object, or an individual plugin.
-    Foundation.MediaQuery._init();
+    MediaQuery.init();
     Foundation.reflow(this);
   }else if(type === 'string'){//an individual method to invoke on a plugin or group of plugins
     var args = Array.prototype.slice.call(arguments, 1);//collect all the arguments, if necessary

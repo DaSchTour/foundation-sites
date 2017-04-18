@@ -1,6 +1,8 @@
+import * as $ from "jquery";
 import { Foundation, FoundationPlugin } from "./foundation.core";
 import { Keyboard } from "./foundation.util.keyboard";
 import { MediaQuery } from "./foundation.util.mediaQuery";
+import { Motion } from "./foundation.util.motion";
 
 export interface RevealOptions {
   animationIn?: string;
@@ -10,8 +12,8 @@ export interface RevealOptions {
   closeOnClick?: boolean;
   closeOnEsc?: boolean;
   multipleOpened?: boolean;
-  vOffset?: number;
-  hOffset?: number;
+  vOffset?: number | string;
+  hOffset?: number | string;
   fullScreen?: boolean;
   btmOffsetPct?: number;
   overlay?: boolean;
@@ -294,11 +296,11 @@ export class Reveal implements FoundationPlugin {
         Keyboard.trapFocus(_this.$element);
       }
       if (this.options.overlay) {
-        Foundation.Motion.animateIn(this.$overlay, 'fade-in');
+        Motion.animateIn(this.$overlay, 'fade-in');
       }
-      Foundation.Motion.animateIn(this.$element, this.options.animationIn, () => {
+      Motion.animateIn(this.$element, this.options.animationIn, () => {
         if(this.$element) { // protect against object having been removed
-          this.focusableElements = Foundation.Keyboard.findFocusable(this.$element);
+          this.focusableElements = Keyboard.findFocusable(this.$element);
           afterAnimation();
         }
       });
@@ -407,10 +409,10 @@ export class Reveal implements FoundationPlugin {
     // Motion UI method of hiding
     if (this.options.animationOut) {
       if (this.options.overlay) {
-        Foundation.Motion.animateOut(this.$overlay, 'fade-out');
+        Motion.animateOut(this.$overlay, 'fade-out');
       }
 
-      Foundation.Motion.animateOut(this.$element, this.options.animationOut, finishUp);
+      Motion.animateOut(this.$element, this.options.animationOut, finishUp);
     }
     // jQuery method of hiding
     else {
@@ -452,7 +454,7 @@ export class Reveal implements FoundationPlugin {
       }
 
 
-      Foundation.Keyboard.releaseFocus(_this.$element);
+      Keyboard.releaseFocus(_this.$element);
 
       _this.$element.attr('aria-hidden', true);
 

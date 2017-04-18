@@ -1,8 +1,5 @@
-'use strict';
-
-!function($) {
-
-const Nest = {
+import { Foundation } from "./foundation.core";
+export const Nest = {
   Feather(menu, type = 'zf') {
     menu.attr('role', 'menubar');
 
@@ -74,8 +71,7 @@ const Nest = {
     //   }
     // });
   }
-}
+};
 
-Foundation.Nest = Nest;
+Foundation['Nest'] = Nest;
 
-}(jQuery);

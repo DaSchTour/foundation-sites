@@ -1,3 +1,5 @@
+import * as $ from "jquery";
+
 export const MutationObserver = (function () {
   var prefixes = ['WebKit', 'Moz', 'O', 'Ms', ''];
   for (var i=0; i < prefixes.length; i++) {
@@ -76,7 +78,7 @@ export function checkListeners() {
 }
 
 //******** only fires this function once on load, if there's something to watch ********
-export function closemeListener(pluginName) {
+export function closemeListener(pluginName?) {
   var yetiBoxes = $('[data-yeti-box]'),
       plugNames = ['dropdown', 'tooltip', 'reveal'];
 
@@ -107,7 +109,7 @@ export function closemeListener(pluginName) {
   }
 }
 
-export function resizeListener(debounce){
+export function resizeListener(debounce = 10){
   let timer,
       $nodes = $('[data-resize]');
   if($nodes.length){
@@ -124,12 +126,12 @@ export function resizeListener(debounce){
         }
         //trigger all listening elements and signal a resize event
         $nodes.attr('data-events', "resize");
-      }, debounce || 10);//default time to emit resize event
+      }, debounce);//default time to emit resize event
     });
   }
 }
 
-export function scrollListener(debounce){
+export function scrollListener(debounce = 10){
   let timer,
       $nodes = $('[data-scroll]');
   if($nodes.length){
@@ -146,7 +148,7 @@ export function scrollListener(debounce){
         }
         //trigger all listening elements and signal a scroll event
         $nodes.attr('data-events', "scroll");
-      }, debounce || 10);//default time to emit scroll event
+      }, debounce);//default time to emit scroll event
     });
   }
 }
@@ -199,6 +201,6 @@ export function eventsListener() {
 
 // [PH]
 // Foundation.CheckWatchers = checkWatchers;
-Foundation.IHearYou = checkListeners;
+Foundation["IHearYou"] = checkListeners;
 // Foundation.ISeeYou = scrollListener;
 // Foundation.IFeelYou = closemeListener;

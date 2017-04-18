@@ -1,21 +1,18 @@
-'use strict';
-
-!function($) {
-
+import { Foundation } from "./foundation.core";
 /**
  * Motion module.
  * @module foundation.motion
  */
 
-const initClasses   = ['mui-enter', 'mui-leave'];
-const activeClasses = ['mui-enter-active', 'mui-leave-active'];
+export const initClasses   = ['mui-enter', 'mui-leave'];
+export const activeClasses = ['mui-enter-active', 'mui-leave-active'];
 
-const Motion = {
-  animateIn: function(element, animation, cb) {
+export const Motion = {
+  animateIn: (element, animation, cb?) => {
     animate(true, element, animation, cb);
   },
 
-  animateOut: function(element, animation, cb) {
+  animateOut: (element, animation, cb?) => {
     animate(false, element, animation, cb);
   }
 }
@@ -54,7 +51,7 @@ function Move(duration, elem, fn){
  * @param {String} animation - CSS class to use.
  * @param {Function} cb - Callback to run when animation is finished.
  */
-function animate(isIn, element, animation, cb) {
+function animate(isIn: boolean, element: JQuery, animation: string, cb?: Function) {
   element = $(element).eq(0);
 
   if (!element.length) return;
@@ -99,7 +96,5 @@ function animate(isIn, element, animation, cb) {
   }
 }
 
-Foundation.Move = Move;
-Foundation.Motion = Motion;
-
-}(jQuery);
+Foundation["Move"] = Move;
+Foundation["Motion"] = Motion;

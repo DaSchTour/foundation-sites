@@ -1,6 +1,12 @@
-'use strict';
+import * as $ from "jquery";
+import { Foundation } from "./foundation.core";
+import { Keyboard } from "./foundation.util.keyboard";
 
-!function($) {
+export interface AccordionOptions {
+  slideSpeed?: number
+  multiExpand?: boolean;
+  allowAllClosed?: boolean;
+}
 
 /**
  * Accordion module.
@@ -9,7 +15,13 @@
  * @requires foundation.util.motion
  */
 
-class Accordion {
+export class Accordion {
+
+  public $element: JQuery;
+  private options: AccordionOptions;
+  private $tabs: JQuery;
+  private firstTimeInit: boolean;
+
   /**
    * Creates a new instance of an accordion.
    * @class
@@ -17,14 +29,14 @@ class Accordion {
    * @param {jQuery} element - jQuery object to make into an accordion.
    * @param {Object} options - a plain object with settings to override the default options.
    */
-  constructor(element, options) {
+  constructor(element, options: AccordionOptions) {
     this.$element = element;
     this.options = $.extend({}, Accordion.defaults, this.$element.data(), options);
 
     this._init();
 
     Foundation.registerPlugin(this, 'Accordion');
-    Foundation.Keyboard.register('Accordion', {
+    Keyboard.register('Accordion', {
       'ENTER': 'toggle',
       'SPACE': 'toggle',
       'ARROW_DOWN': 'next',
@@ -63,43 +75,43 @@ class Accordion {
       this.firstTimeInit = false;
     }
 
-    this._checkDeepLink = () => {
-      var anchor = window.location.hash;
-      //need a hash and a relevant anchor in this tabset
-      if(anchor.length) {
-        var $link = this.$element.find('[href$="'+anchor+'"]'),
-        $anchor = $(anchor);
-
-        if ($link.length && $anchor) {
-          if (!$link.parent('[data-accordion-item]').hasClass('is-active')) {
-            this.down($anchor, this.firstTimeInit);
-            this.firstTimeInit = false;
-          };
-
-          //roll up a little to show the titles
-          if (this.options.deepLinkSmudge) {
-            var _this = this;
-            $(window).load(function() {
-              var offset = _this.$element.offset();
-              $('html, body').animate({ scrollTop: offset.top }, _this.options.deepLinkSmudgeDelay);
-            });
-          }
-
-          /**
-            * Fires when the zplugin has deeplinked at pageload
-            * @event Accordion#deeplink
-            */
-          this.$element.trigger('deeplink.zf.accordion', [$link, $anchor]);
-        }
-      }
-    }
-
     //use browser to open a tab, if it exists in this tabset
     if (this.options.deepLink) {
       this._checkDeepLink();
     }
 
     this._events();
+  }
+
+  private _checkDeepLink() {
+    var anchor = window.location.hash;
+    //need a hash and a relevant anchor in this tabset
+    if (anchor.length) {
+      var $link = this.$element.find('[href$="' + anchor + '"]'),
+        $anchor = $(anchor);
+
+      if ($link.length && $anchor) {
+        if (!$link.parent('[data-accordion-item]').hasClass('is-active')) {
+          this.down($anchor, this.firstTimeInit);
+          this.firstTimeInit = false;
+        }
+
+        //roll up a little to show the titles
+        if (this.options.deepLinkSmudge) {
+          var _this = this;
+          $(window).load(function () {
+            var offset = _this.$element.offset();
+            $('html, body').animate({scrollTop: offset.top}, _this.options.deepLinkSmudgeDelay);
+          });
+        }
+
+        /**
+         * Fires when the zplugin has deeplinked at pageload
+         * @event Accordion#deeplink
+         */
+        this.$element.trigger('deeplink.zf.accordion', [$link, $anchor]);
+      }
+    }
   }
 
   /**
@@ -177,7 +189,7 @@ class Accordion {
    * @fires Accordion#down
    * @function
    */
-  down($target, firstTime) {
+  down($target, firstTime = false) {
     $target
       .attr('aria-hidden', false)
       .parent('[data-tab-content]')
@@ -211,7 +223,7 @@ class Accordion {
    * @fires Accordion#up
    * @function
    */
-  up($target) {
+  up($target: JQuery) {
     var $aunts = $target.parent().siblings(),
         _this = this;
 
@@ -252,64 +264,62 @@ class Accordion {
 
     Foundation.unregisterPlugin(this);
   }
+
+  public static defaults = {
+    /**
+     * Amount of time to animate the opening of an accordion pane.
+     * @option
+     * @type {number}
+     * @default 250
+     */
+    slideSpeed: 250,
+    /**
+     * Allow the accordion to have multiple open panes.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    multiExpand: false,
+    /**
+     * Allow the accordion to close all panes.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    allowAllClosed: false,
+    /**
+     * Allows the window to scroll to content of pane specified by hash anchor
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    deepLink: false,
+
+    /**
+     * Adjust the deep link scroll to make sure the top of the accordion panel is visible
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    deepLinkSmudge: false,
+
+    /**
+     * Animation time (ms) for the deep link adjustment
+     * @option
+     * @type {number}
+     * @default 300
+     */
+    deepLinkSmudgeDelay: 300,
+
+    /**
+     * Update the browser history with the open accordion
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    updateHistory: false
+  };
 }
-
-Accordion.defaults = {
-  /**
-   * Amount of time to animate the opening of an accordion pane.
-   * @option
-   * @type {number}
-   * @default 250
-   */
-  slideSpeed: 250,
-  /**
-   * Allow the accordion to have multiple open panes.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  multiExpand: false,
-  /**
-   * Allow the accordion to close all panes.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  allowAllClosed: false,
-  /**
-   * Allows the window to scroll to content of pane specified by hash anchor
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  deepLink: false,
-
-  /**
-   * Adjust the deep link scroll to make sure the top of the accordion panel is visible
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  deepLinkSmudge: false,
-
-  /**
-   * Animation time (ms) for the deep link adjustment
-   * @option
-   * @type {number}
-   * @default 300
-   */
-  deepLinkSmudgeDelay: 300,
-
-  /**
-   * Update the browser history with the open accordion
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  updateHistory: false
-};
 
 // Window exports
 Foundation.plugin(Accordion, 'Accordion');
-
-}(jQuery);

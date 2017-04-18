@@ -1,6 +1,28 @@
-'use strict';
+import * as $ from "jquery";
+import { Keyboard } from "./foundation.util.keyboard";
+import { Foundation, FoundationPlugin } from "./foundation.core";
+import { Motion } from "./foundation.util.motion";
 
-!function($) {
+export interface OrbitOptions {
+  bullets?: boolean;
+  navButtons?: boolean;
+  animInFromRight?: string;
+  animOutToRight?: string;
+  animInFromLeft?: string;
+  animOutToLeft?: string;
+  autoPlay?: boolean;
+  timerDelay?: number;
+  infiniteWrap?: boolean;
+  swipe?: boolean;
+  pauseOnHover?: boolean;
+  accessible?: boolean;
+  containerClass?: string;
+  slideClass?: string;
+  boxOfBullets?: string;
+  nextClass?: string;
+  prevClass?: string;
+  useMUI?: boolean;
+}
 
 /**
  * Orbit module.
@@ -11,7 +33,9 @@
  * @requires foundation.util.touch
  */
 
-class Orbit {
+export class Orbit implements FoundationPlugin {
+  public $element: JQuery;
+  private options: OrbitOptions;
   /**
   * Creates a new instance of an orbit carousel.
   * @class
@@ -25,7 +49,7 @@ class Orbit {
     this._init();
 
     Foundation.registerPlugin(this, 'Orbit');
-    Foundation.Keyboard.register('Orbit', {
+    Keyboard.register('Orbit', {
       'ltr': {
         'ARROW_RIGHT': 'next',
         'ARROW_LEFT': 'previous'
@@ -130,7 +154,7 @@ class Orbit {
   * @private
   * @param {Function} cb - a callback function to fire when complete.
   */
-  _setWrapperHeight(cb) {//rewrite this to `for` loop
+  _setWrapperHeight(cb?) {//rewrite this to `for` loop
     var max = 0, temp, counter = 0, _this = this;
 
     this.$slides.each(function() {
@@ -176,7 +200,7 @@ class Orbit {
     //
     this.$element.off('.resizeme.zf.trigger').on({
       'resizeme.zf.trigger': this._prepareForOrbit.bind(this)
-    })
+    });
     if (this.$slides.length > 1) {
 
       if (this.options.swipe) {
@@ -232,7 +256,7 @@ class Orbit {
       if (this.options.accessible) {
         this.$wrapper.add(this.$bullets).on('keydown.zf.orbit', function(e) {
           // handle keyboard event with keyboard util
-          Foundation.Keyboard.handleKey(e, 'Orbit', {
+          Keyboard.handleKey(e, 'Orbit', {
             next: function() {
               _this.changeSlide(true);
             },
@@ -331,7 +355,7 @@ class Orbit {
       }
 
       if (this.options.useMUI && !this.$element.is(':hidden')) {
-        Foundation.Motion.animateIn(
+        Motion.animateIn(
           $newSlide.addClass('is-active').css({'position': 'absolute', 'top': 0}),
           this.options[`animInFrom${dirIn}`],
           function(){
@@ -339,7 +363,7 @@ class Orbit {
             .attr('aria-live', 'polite');
         });
 
-        Foundation.Motion.animateOut(
+        Motion.animateOut(
           $curSlide.removeClass('is-active'),
           this.options[`animOutTo${dirOut}`],
           function(){
@@ -385,139 +409,137 @@ class Orbit {
     this.$element.off('.zf.orbit').find('*').off('.zf.orbit').end().hide();
     Foundation.unregisterPlugin(this);
   }
-}
 
-Orbit.defaults = {
-  /**
-  * Tells the JS to look for and loadBullets.
-  * @option
-   * @type {boolean}
-  * @default true
-  */
-  bullets: true,
-  /**
-  * Tells the JS to apply event listeners to nav buttons
-  * @option
-   * @type {boolean}
-  * @default true
-  */
-  navButtons: true,
-  /**
-  * motion-ui animation class to apply
-  * @option
-   * @type {string}
-  * @default 'slide-in-right'
-  */
-  animInFromRight: 'slide-in-right',
-  /**
-  * motion-ui animation class to apply
-  * @option
-   * @type {string}
-  * @default 'slide-out-right'
-  */
-  animOutToRight: 'slide-out-right',
-  /**
-  * motion-ui animation class to apply
-  * @option
-   * @type {string}
-  * @default 'slide-in-left'
-  *
-  */
-  animInFromLeft: 'slide-in-left',
-  /**
-  * motion-ui animation class to apply
-  * @option
-   * @type {string}
-  * @default 'slide-out-left'
-  */
-  animOutToLeft: 'slide-out-left',
-  /**
-  * Allows Orbit to automatically animate on page load.
-  * @option
-   * @type {boolean}
-  * @default true
-  */
-  autoPlay: true,
-  /**
-  * Amount of time, in ms, between slide transitions
-  * @option
-   * @type {number}
-  * @default 5000
-  */
-  timerDelay: 5000,
-  /**
-  * Allows Orbit to infinitely loop through the slides
-  * @option
-   * @type {boolean}
-  * @default true
-  */
-  infiniteWrap: true,
-  /**
-  * Allows the Orbit slides to bind to swipe events for mobile, requires an additional util library
-  * @option
-   * @type {boolean}
-  * @default true
-  */
-  swipe: true,
-  /**
-  * Allows the timing function to pause animation on hover.
-  * @option
-   * @type {boolean}
-  * @default true
-  */
-  pauseOnHover: true,
-  /**
-  * Allows Orbit to bind keyboard events to the slider, to animate frames with arrow keys
-  * @option
-   * @type {boolean}
-  * @default true
-  */
-  accessible: true,
-  /**
-  * Class applied to the container of Orbit
-  * @option
-   * @type {string}
-  * @default 'orbit-container'
-  */
-  containerClass: 'orbit-container',
-  /**
-  * Class applied to individual slides.
-  * @option
-   * @type {string}
-  * @default 'orbit-slide'
-  */
-  slideClass: 'orbit-slide',
-  /**
-  * Class applied to the bullet container. You're welcome.
-  * @option
-   * @type {string}
-  * @default 'orbit-bullets'
-  */
-  boxOfBullets: 'orbit-bullets',
-  /**
-  * Class applied to the `next` navigation button.
-  * @option
-   * @type {string}
-  * @default 'orbit-next'
-  */
-  nextClass: 'orbit-next',
-  /**
-  * Class applied to the `previous` navigation button.
-  * @option
-   * @type {string}
-  * @default 'orbit-previous'
-  */
-  prevClass: 'orbit-previous',
-  /**
-  * Boolean to flag the js to use motion ui classes or not. Default to true for backwards compatability.
-  * @option
-   * @type {boolean}
-  * @default true
-  */
-  useMUI: true
-};
+  public static defaults = {
+    /**
+     * Tells the JS to look for and loadBullets.
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    bullets: true,
+    /**
+     * Tells the JS to apply event listeners to nav buttons
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    navButtons: true,
+    /**
+     * motion-ui animation class to apply
+     * @option
+     * @type {string}
+     * @default 'slide-in-right'
+     */
+    animInFromRight: 'slide-in-right',
+    /**
+     * motion-ui animation class to apply
+     * @option
+     * @type {string}
+     * @default 'slide-out-right'
+     */
+    animOutToRight: 'slide-out-right',
+    /**
+     * motion-ui animation class to apply
+     * @option
+     * @type {string}
+     * @default 'slide-in-left'
+     *
+     */
+    animInFromLeft: 'slide-in-left',
+    /**
+     * motion-ui animation class to apply
+     * @option
+     * @type {string}
+     * @default 'slide-out-left'
+     */
+    animOutToLeft: 'slide-out-left',
+    /**
+     * Allows Orbit to automatically animate on page load.
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    autoPlay: true,
+    /**
+     * Amount of time, in ms, between slide transitions
+     * @option
+     * @type {number}
+     * @default 5000
+     */
+    timerDelay: 5000,
+    /**
+     * Allows Orbit to infinitely loop through the slides
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    infiniteWrap: true,
+    /**
+     * Allows the Orbit slides to bind to swipe events for mobile, requires an additional util library
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    swipe: true,
+    /**
+     * Allows the timing function to pause animation on hover.
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    pauseOnHover: true,
+    /**
+     * Allows Orbit to bind keyboard events to the slider, to animate frames with arrow keys
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    accessible: true,
+    /**
+     * Class applied to the container of Orbit
+     * @option
+     * @type {string}
+     * @default 'orbit-container'
+     */
+    containerClass: 'orbit-container',
+    /**
+     * Class applied to individual slides.
+     * @option
+     * @type {string}
+     * @default 'orbit-slide'
+     */
+    slideClass: 'orbit-slide',
+    /**
+     * Class applied to the bullet container. You're welcome.
+     * @option
+     * @type {string}
+     * @default 'orbit-bullets'
+     */
+    boxOfBullets: 'orbit-bullets',
+    /**
+     * Class applied to the `next` navigation button.
+     * @option
+     * @type {string}
+     * @default 'orbit-next'
+     */
+    nextClass: 'orbit-next',
+    /**
+     * Class applied to the `previous` navigation button.
+     * @option
+     * @type {string}
+     * @default 'orbit-previous'
+     */
+    prevClass: 'orbit-previous',
+    /**
+     * Boolean to flag the js to use motion ui classes or not. Default to true for backwards compatability.
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    useMUI: true
+  }
+}
 
 // Window exports
 Foundation.plugin(Orbit, 'Orbit');
-
-}(jQuery);

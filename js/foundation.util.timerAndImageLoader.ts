@@ -1,10 +1,6 @@
-'use strict';
-
-!function($) {
-
-function Timer(elem, options, cb) {
-  var _this = this,
-      duration = options.duration,//options is an object for easily adding features later.
+import { Foundation } from "./foundation.core";
+export function Timer(elem, options, cb) {
+  var duration = options.duration,//options is an object for easily adding features later.
       nameSpace = Object.keys(elem.data())[0] || 'timer',
       remain = -1,
       start,
@@ -12,29 +8,29 @@ function Timer(elem, options, cb) {
 
   this.isPaused = false;
 
-  this.restart = function() {
+  this.restart = () => {
     remain = -1;
     clearTimeout(timer);
     this.start();
   }
 
-  this.start = function() {
+  this.start = () => {
     this.isPaused = false;
     // if(!elem.data('paused')){ return false; }//maybe implement this sanity check if used for other things.
     clearTimeout(timer);
     remain = remain <= 0 ? duration : remain;
     elem.data('paused', false);
     start = Date.now();
-    timer = setTimeout(function(){
+    timer = setTimeout(() => {
       if(options.infinite){
-        _this.restart();//rerun the timer.
+        this.restart();//rerun the timer.
       }
       if (cb && typeof cb === 'function') { cb(); }
     }, remain);
     elem.trigger(`timerstart.zf.${nameSpace}`);
   }
 
-  this.pause = function() {
+  this.pause = () => {
     this.isPaused = true;
     //if(elem.data('paused')){ return false; }//maybe implement this sanity check if used for other things.
     clearTimeout(timer);
@@ -50,7 +46,7 @@ function Timer(elem, options, cb) {
  * @param {Object} images - Image(s) to check if loaded.
  * @param {Func} callback - Function to execute when image is fully loaded.
  */
-function onImagesLoaded(images, callback){
+export function onImagesLoaded(images, callback){
   var self = this,
       unloaded = images.length;
 
@@ -82,7 +78,6 @@ function onImagesLoaded(images, callback){
   }
 }
 
-Foundation.Timer = Timer;
-Foundation.onImagesLoaded = onImagesLoaded;
+Foundation['Timer'] = Timer;
+Foundation['onImagesLoaded'] = onImagesLoaded;
 
-}(jQuery);
