@@ -6,11 +6,7 @@
  *                                         *
  ******************************************/
 
-'use strict';
-
-!function($) {
-
-const keyCodes = {
+export const keyCodes = {
   9: 'TAB',
   13: 'ENTER',
   27: 'ESCAPE',
@@ -21,9 +17,9 @@ const keyCodes = {
   40: 'ARROW_DOWN'
 }
 
-var commands = {}
+export var commands = {};
 
-var Keyboard = {
+export var Keyboard = {
   keys: getKeyCodes(keyCodes),
 
   /**
@@ -106,7 +102,7 @@ var Keyboard = {
 
   register(componentName, cmds) {
     commands[componentName] = cmds;
-  },  
+  },
 
   /**
    * Traps the focus in the given element.
@@ -148,5 +144,3 @@ function getKeyCodes(kcs) {
 }
 
 Foundation.Keyboard = Keyboard;
-
-}(jQuery);

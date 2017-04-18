@@ -55,3 +55,7 @@ data.json
 npm-debug.log
 foundation-docs
 vendor
+
+### for TS version
+/js/**/*.js
+/js/**/*.d.ts

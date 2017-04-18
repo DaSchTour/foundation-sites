@@ -1,6 +1,25 @@
-'use strict';
+import { Foundation, FoundationPlugin } from "./foundation.core";
+import { Keyboard } from "./foundation.util.keyboard";
+import { MediaQuery } from "./foundation.util.mediaQuery";
 
-!function($) {
+export interface RevealOptions {
+  animationIn?: string;
+  animationOut?: string;
+  showDelay?: number;
+  hideDelay?: number;
+  closeOnClick?: boolean;
+  closeOnEsc?: boolean;
+  multipleOpened?: boolean;
+  vOffset?: number;
+  hOffset?: number;
+  fullScreen?: boolean;
+  btmOffsetPct?: number;
+  overlay?: boolean;
+  resetOnClose?: boolean;
+  deepLink?: boolean;
+  appendTo?: string;
+  additionalOverlayClasses?: string;
+}
 
 /**
  * Reveal module.
@@ -12,20 +31,33 @@
  * @requires foundation.util.motion if using animations
  */
 
-class Reveal {
+export class Reveal implements FoundationPlugin {
+
+  private options: RevealOptions;
+  public $element: JQuery;
+  private isActive: boolean;
+  private id: string;
+  private cached: {
+    mq: string;
+  };
+  private isMobile: boolean;
+  private $anchor: JQuery;
+  private $overlay: JQuery;
+
+
   /**
    * Creates a new instance of Reveal.
    * @class
    * @param {jQuery} element - jQuery object to use for the modal.
    * @param {Object} options - optional parameters.
    */
-  constructor(element, options) {
+  constructor(element: JQuery, options: RevealOptions) {
     this.$element = element;
     this.options = $.extend({}, Reveal.defaults, this.$element.data(), options);
     this._init();
 
     Foundation.registerPlugin(this, 'Reveal');
-    Foundation.Keyboard.register('Reveal', {
+    Keyboard.register('Reveal', {
       'ENTER': 'open',
       'SPACE': 'open',
       'ESCAPE': 'close',
@@ -39,7 +71,7 @@ class Reveal {
   _init() {
     this.id = this.$element.attr('id');
     this.isActive = false;
-    this.cached = {mq: Foundation.MediaQuery.current};
+    this.cached = {mq: MediaQuery.current};
     this.isMobile = mobileSniff();
 
     this.$anchor = $(`[data-open="${this.id}"]`).length ? $(`[data-open="${this.id}"]`) : $(`[data-toggle="${this.id}"]`);
@@ -259,7 +291,7 @@ class Reveal {
           })
           .focus();
         addRevealOpenClasses();
-        Foundation.Keyboard.trapFocus(_this.$element);
+        Keyboard.trapFocus(_this.$element);
       }
       if (this.options.overlay) {
         Foundation.Motion.animateIn(this.$overlay, 'fade-in');
@@ -286,7 +318,7 @@ class Reveal {
         'tabindex': -1
       })
       .focus();
-    Foundation.Keyboard.trapFocus(this.$element);
+    Keyboard.trapFocus(this.$element);
 
     /**
      * Fires when the modal has successfully opened.
@@ -308,7 +340,7 @@ class Reveal {
   _extraHandlers() {
     var _this = this;
     if(!this.$element) { return; } // If we're in the middle of cleanup, don't freak out
-    this.focusableElements = Foundation.Keyboard.findFocusable(this.$element);
+    this.focusableElements = Keyboard.findFocusable(this.$element);
 
     if (!this.options.overlay && this.options.closeOnClick && !this.options.fullScreen) {
       $('body').on('click.zf.reveal', function(e) {
@@ -321,7 +353,7 @@ class Reveal {
 
     if (this.options.closeOnEsc) {
       $(window).on('keydown.zf.reveal', function(e) {
-        Foundation.Keyboard.handleKey(e, 'Reveal', {
+        Keyboard.handleKey(e, 'Reveal', {
           close: function() {
             if (_this.options.closeOnEsc) {
               _this.close();
@@ -336,7 +368,7 @@ class Reveal {
     this.$element.on('keydown.zf.reveal', function(e) {
       var $target = $(this);
       // handle keyboard event with keyboard util
-      Foundation.Keyboard.handleKey(e, 'Reveal', {
+      Keyboard.handleKey(e, 'Reveal', {
         open: function() {
           if (_this.$element.find(':focus').is(_this.$element.find('[data-close]'))) {
             setTimeout(function() { // set focus back to anchor if close button has been activated
@@ -476,136 +508,133 @@ class Reveal {
 
     Foundation.unregisterPlugin(this);
   };
-}
-
-Reveal.defaults = {
-  /**
-   * Motion-UI class to use for animated elements. If none used, defaults to simple show/hide.
-   * @option
-   * @type {string}
-   * @default ''
-   */
-  animationIn: '',
-  /**
-   * Motion-UI class to use for animated elements. If none used, defaults to simple show/hide.
-   * @option
-   * @type {string}
-   * @default ''
-   */
-  animationOut: '',
-  /**
-   * Time, in ms, to delay the opening of a modal after a click if no animation used.
-   * @option
-   * @type {number}
-   * @default 0
-   */
-  showDelay: 0,
-  /**
-   * Time, in ms, to delay the closing of a modal after a click if no animation used.
-   * @option
-   * @type {number}
-   * @default 0
-   */
-  hideDelay: 0,
-  /**
-   * Allows a click on the body/overlay to close the modal.
-   * @option
-   * @type {boolean}
-   * @default true
-   */
-  closeOnClick: true,
-  /**
-   * Allows the modal to close if the user presses the `ESCAPE` key.
-   * @option
-   * @type {boolean}
-   * @default true
-   */
-  closeOnEsc: true,
-  /**
-   * If true, allows multiple modals to be displayed at once.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  multipleOpened: false,
-  /**
-   * Distance, in pixels, the modal should push down from the top of the screen.
-   * @option
-   * @type {number|string}
-   * @default auto
-   */
-  vOffset: 'auto',
-  /**
-   * Distance, in pixels, the modal should push in from the side of the screen.
-   * @option
-   * @type {number|string}
-   * @default auto
-   */
-  hOffset: 'auto',
-  /**
-   * Allows the modal to be fullscreen, completely blocking out the rest of the view. JS checks for this as well.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  fullScreen: false,
-  /**
-   * Percentage of screen height the modal should push up from the bottom of the view.
-   * @option
-   * @type {number}
-   * @default 10
-   */
-  btmOffsetPct: 10,
-  /**
-   * Allows the modal to generate an overlay div, which will cover the view when modal opens.
-   * @option
-   * @type {boolean}
-   * @default true
-   */
-  overlay: true,
-  /**
-   * Allows the modal to remove and reinject markup on close. Should be true if using video elements w/o using provider's api, otherwise, videos will continue to play in the background.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  resetOnClose: false,
-  /**
-   * Allows the modal to alter the url on open/close, and allows the use of the `back` button to close modals. ALSO, allows a modal to auto-maniacally open on page load IF the hash === the modal's user-set id.
-   * @option
-   * @type {boolean}
-   * @default false
-   */
-  deepLink: false,
+  public static defaults: RevealOptions = {
     /**
-   * Allows the modal to append to custom div.
-   * @option
-   * @type {string}
-   * @default "body"
-   */
-  appendTo: "body",
-  /**
-   * Allows adding additional class names to the reveal overlay.
-   * @option
-   * @type {string}
-   * @default ''
-   */
-  additionalOverlayClasses: ''
-};
+     * Motion-UI class to use for animated elements. If none used, defaults to simple show/hide.
+     * @option
+     * @type {string}
+     * @default ''
+     */
+    animationIn: '',
+    /**
+     * Motion-UI class to use for animated elements. If none used, defaults to simple show/hide.
+     * @option
+     * @type {string}
+     * @default ''
+     */
+    animationOut: '',
+    /**
+     * Time, in ms, to delay the opening of a modal after a click if no animation used.
+     * @option
+     * @type {number}
+     * @default 0
+     */
+    showDelay: 0,
+    /**
+     * Time, in ms, to delay the closing of a modal after a click if no animation used.
+     * @option
+     * @type {number}
+     * @default 0
+     */
+    hideDelay: 0,
+    /**
+     * Allows a click on the body/overlay to close the modal.
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    closeOnClick: true,
+    /**
+     * Allows the modal to close if the user presses the `ESCAPE` key.
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    closeOnEsc: true,
+    /**
+     * If true, allows multiple modals to be displayed at once.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    multipleOpened: false,
+    /**
+     * Distance, in pixels, the modal should push down from the top of the screen.
+     * @option
+     * @type {number|string}
+     * @default auto
+     */
+    vOffset: 'auto',
+    /**
+     * Distance, in pixels, the modal should push in from the side of the screen.
+     * @option
+     * @type {number|string}
+     * @default auto
+     */
+    hOffset: 'auto',
+    /**
+     * Allows the modal to be fullscreen, completely blocking out the rest of the view. JS checks for this as well.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    fullScreen: false,
+    /**
+     * Percentage of screen height the modal should push up from the bottom of the view.
+     * @option
+     * @type {number}
+     * @default 10
+     */
+    btmOffsetPct: 10,
+    /**
+     * Allows the modal to generate an overlay div, which will cover the view when modal opens.
+     * @option
+     * @type {boolean}
+     * @default true
+     */
+    overlay: true,
+    /**
+     * Allows the modal to remove and reinject markup on close. Should be true if using video elements w/o using provider's api, otherwise, videos will continue to play in the background.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    resetOnClose: false,
+    /**
+     * Allows the modal to alter the url on open/close, and allows the use of the `back` button to close modals. ALSO, allows a modal to auto-maniacally open on page load IF the hash === the modal's user-set id.
+     * @option
+     * @type {boolean}
+     * @default false
+     */
+    deepLink: false,
+    /**
+     * Allows the modal to append to custom div.
+     * @option
+     * @type {string}
+     * @default "body"
+     */
+    appendTo: "body",
+    /**
+     * Allows adding additional class names to the reveal overlay.
+     * @option
+     * @type {string}
+     * @default ''
+     */
+    additionalOverlayClasses: ''
+  }
+}
 
 // Window exports
 Foundation.plugin(Reveal, 'Reveal');
 
-function iPhoneSniff() {
+function iPhoneSniff(): boolean {
   return /iP(ad|hone|od).*OS/.test(window.navigator.userAgent);
 }
 
-function androidSniff() {
+function androidSniff(): boolean {
   return /Android/.test(window.navigator.userAgent);
 }
 
-function mobileSniff() {
+function mobileSniff(): boolean {
   return iPhoneSniff() || androidSniff();
 }
-
-}(jQuery);

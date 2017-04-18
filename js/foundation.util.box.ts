@@ -1,11 +1,14 @@
-'use strict';
-
-!function($) {
-
-Foundation.Box = {
+import { Foundation } from "./foundation.core";
+Foundation['Box'] = {
   ImNotTouchingYou: ImNotTouchingYou,
   GetDimensions: GetDimensions,
   GetOffsets: GetOffsets
+}
+
+export const Box = {
+  ImNotTouchingYou,
+  GetDimensions,
+  GetOffsets
 }
 
 /**
@@ -18,7 +21,7 @@ Foundation.Box = {
  * @default if no parent object passed, detects collisions with `window`.
  * @returns {Boolean} - true if collision free, false if a collision in any direction.
  */
-function ImNotTouchingYou(element, parent, lrOnly, tbOnly) {
+export function ImNotTouchingYou(element, parent?, lrOnly = false, tbOnly = false) {
   var eleDims = GetDimensions(element),
       top, bottom, left, right;
 
@@ -57,7 +60,7 @@ function ImNotTouchingYou(element, parent, lrOnly, tbOnly) {
  * @returns {Object} - nested object of integer pixel values
  * TODO - if element is window, return only those values.
  */
-function GetDimensions(elem, test){
+export function GetDimensions(elem: JQuery | HTMLElement, test?){
   elem = elem.length ? elem[0] : elem;
 
   if (elem === window || elem === document) {
@@ -108,7 +111,7 @@ function GetDimensions(elem, test){
  * @param {Boolean} isOverflow - if a collision event is detected, sets to true to default the element to full width - any desired offset.
  * TODO alter/rewrite to work with `em` values as well/instead of pixels
  */
-function GetOffsets(element, anchor, position, vOffset, hOffset, isOverflow) {
+export function GetOffsets(element: JQuery, anchor?: JQuery, position, vOffset, hOffset, isOverflow) {
   var $eleDims = GetDimensions(element),
       $anchorDims = anchor ? GetDimensions(anchor) : null;
 

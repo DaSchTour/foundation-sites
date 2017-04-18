@@ -1,12 +1,18 @@
-!function($) {
+export const FOUNDATION_VERSION = '6.3.1';
 
-"use strict";
+export interface FoundationPlugin {
+  $element: JQuery;
+  uuid?: string;
+}
 
-var FOUNDATION_VERSION = '6.3.1';
+export interface FoundationPluginConstructor {
+  new($element: JQuery, opts: any): FoundationPlugin;
+}
+
 
 // Global Foundation object
 // This is attached to the window, or used as a module for AMD/Browserify
-var Foundation = {
+export const Foundation = {
   version: FOUNDATION_VERSION,
 
   /**
@@ -22,14 +28,14 @@ var Foundation = {
   /**
    * Returns a boolean for RTL support
    */
-  rtl: function(){
+  rtl: () => {
     return $('html').attr('dir') === 'rtl';
   },
   /**
    * Defines a Foundation plugin, adding it to the `Foundation` namespace and the list of plugins to initialize when reflowing.
    * @param {Object} plugin - The constructor of the plugin.
    */
-  plugin: function(plugin, name) {
+  plugin: (plugin: FoundationPluginConstructor, name: string): void => {
     // Object key to use when adding to global Foundation object
     // Examples: Foundation.Reveal, Foundation.OffCanvas
     var className = (name || functionName(plugin));
@@ -38,7 +44,7 @@ var Foundation = {
     var attrName  = hyphenate(className);
 
     // Add to the Foundation object and the plugins list (for reflowing)
-    this._plugins[attrName] = this[className] = plugin;
+    Foundation._plugins[attrName] = this[className] = plugin;
   },
   /**
    * @function
@@ -49,9 +55,9 @@ var Foundation = {
    * @param {String} name - the name of the plugin, passed as a camelCased string.
    * @fires Plugin#init
    */
-  registerPlugin: function(plugin, name){
+  registerPlugin: (plugin: FoundationPlugin, name) => {
     var pluginName = name ? hyphenate(name) : functionName(plugin.constructor).toLowerCase();
-    plugin.uuid = this.GetYoDigits(6, pluginName);
+    plugin.uuid = Foundation.GetYoDigits(6, pluginName);
 
     if(!plugin.$element.attr(`data-${pluginName}`)){ plugin.$element.attr(`data-${pluginName}`, plugin.uuid); }
     if(!plugin.$element.data('zfPlugin')){ plugin.$element.data('zfPlugin', plugin); }
@@ -61,7 +67,7 @@ var Foundation = {
            */
     plugin.$element.trigger(`init.zf.${pluginName}`);
 
-    this._uuids.push(plugin.uuid);
+    Foundation._uuids.push(plugin.uuid);
 
     return;
   },
@@ -73,10 +79,10 @@ var Foundation = {
    * @param {Object} plugin - an instance of a plugin, usually `this` in context.
    * @fires Plugin#destroyed
    */
-  unregisterPlugin: function(plugin){
+  unregisterPlugin: (plugin) => {
     var pluginName = hyphenate(functionName(plugin.$element.data('zfPlugin').constructor));
 
-    this._uuids.splice(this._uuids.indexOf(plugin.uuid), 1);
+    Foundation._uuids.splice(Foundation._uuids.indexOf(plugin.uuid), 1);
     plugin.$element.removeAttr(`data-${pluginName}`).removeData('zfPlugin')
           /**
            * Fires when the plugin has been destroyed.
@@ -95,14 +101,13 @@ var Foundation = {
    * @param {String} plugins - optional string of an individual plugin key, attained by calling `$(element).data('pluginName')`, or string of a plugin class i.e. `'dropdown'`
    * @default If no argument is passed, reflow all currently active plugins.
    */
-   reInit: function(plugins){
-     var isJQ = plugins instanceof $;
+   reInit: function(plugins: string | JQuery){
      try{
-       if(isJQ){
+       if (plugins instanceof jQuery) {
          plugins.each(function(){
            $(this).data('zfPlugin')._init();
          });
-       }else{
+       } else {
          var type = typeof plugins,
          _this = this,
          fns = {
@@ -137,7 +142,7 @@ var Foundation = {
    * @default {String} '' - if no plugin name is provided, nothing is appended to the uid.
    * @returns {String} - unique id
    */
-  GetYoDigits: function(length, namespace){
+  GetYoDigits: (length: number, namespace: string) => {
     length = length || 6;
     return Math.round((Math.pow(36, length + 1) - Math.random() * Math.pow(36, length))).toString(36).slice(1) + (namespace ? `-${namespace}` : '');
   },
@@ -217,32 +222,31 @@ var Foundation = {
       }, 1);
       return 'transitionend';
     }
+  },
+  util: {
+    /**
+     * Function for applying a debounce effect to a function call.
+     * @function
+     * @param {Function} func - Function to be called at end of timeout.
+     * @param {Number} delay - Time in ms to delay the call of `func`.
+     * @returns function
+     */
+    throttle: function (func, delay) {
+      var timer = null;
+
+      return function () {
+        var context = this, args = arguments;
+
+        if (timer === null) {
+          timer = setTimeout(function () {
+            func.apply(context, args);
+            timer = null;
+          }, delay);
+        }
+      };
+    }
   }
-};
-
-Foundation.util = {
-  /**
-   * Function for applying a debounce effect to a function call.
-   * @function
-   * @param {Function} func - Function to be called at end of timeout.
-   * @param {Number} delay - Time in ms to delay the call of `func`.
-   * @returns function
-   */
-  throttle: function (func, delay) {
-    var timer = null;
-
-    return function () {
-      var context = this, args = arguments;
-
-      if (timer === null) {
-        timer = setTimeout(function () {
-          func.apply(context, args);
-          timer = null;
-        }, delay);
-      }
-    };
-  }
-};
+}
 
 // TODO: consider not making this a jQuery function
 // TODO: need way to reflow vs. re-initialize
@@ -250,7 +254,7 @@ Foundation.util = {
  * The Foundation jQuery method.
  * @param {String|Array} method - An action to perform on the current jQuery object.
  */
-var foundation = function(method) {
+const foundation = function(method) {
   var type = typeof method,
       $meta = $('meta.foundation-mq'),
       $noJS = $('.no-js');
@@ -286,7 +290,7 @@ var foundation = function(method) {
   return this;
 };
 
-window.Foundation = Foundation;
+window["Foundation"] = Foundation;
 $.fn.foundation = foundation;
 
 // Polyfill for requestAnimationFrame
@@ -374,5 +378,3 @@ function parseValue(str){
 function hyphenate(str) {
   return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
-
-}(jQuery);

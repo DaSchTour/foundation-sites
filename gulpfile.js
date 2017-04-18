@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var ts = require('gulp-typescript');
 var browser = require('browser-sync');
 var requireDir = require('require-dir');
 var port = process.env.SERVER_PORT || 3000;
@@ -25,3 +26,12 @@ gulp.task('watch', function() {
 
 // Runs all of the above tasks and then waits for files to change
 gulp.task('default', ['serve', 'watch']);
+
+var tsProject = ts.createProject('tsconfig.json');
+
+gulp.task('typescript', function() {
+  var tsResult = gulp.src('js/**/*.ts')
+    .pipe(tsProject());
+
+  return tsResult.js.pipe(gulp.dest('js'));
+});

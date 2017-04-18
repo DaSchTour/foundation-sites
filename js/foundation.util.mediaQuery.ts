@@ -1,9 +1,6 @@
-'use strict';
-
-!function($) {
-
 // Default set of media queries
-const defaultQueries = {
+import { Foundation } from "./foundation.core";
+export const defaultQueries = {
   'default' : 'only screen',
   landscape : 'only screen and (orientation: landscape)',
   portrait : 'only screen and (orientation: portrait)',
@@ -15,7 +12,7 @@ const defaultQueries = {
     'only screen and (min-resolution: 2dppx)'
 };
 
-var MediaQuery = {
+export const MediaQuery = {
   queries: [],
 
   current: '',
@@ -227,4 +224,3 @@ function parseStyleToObject(str) {
 
 Foundation.MediaQuery = MediaQuery;
 
-}(jQuery);

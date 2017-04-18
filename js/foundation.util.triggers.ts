@@ -1,8 +1,4 @@
-'use strict';
-
-!function($) {
-
-const MutationObserver = (function () {
+export const MutationObserver = (function () {
   var prefixes = ['WebKit', 'Moz', 'O', 'Ms', ''];
   for (var i=0; i < prefixes.length; i++) {
     if (`${prefixes[i]}MutationObserver` in window) {
@@ -12,7 +8,7 @@ const MutationObserver = (function () {
   return false;
 }());
 
-const triggers = (el, type) => {
+export const triggers = (el, type) => {
   el.data(type).split(' ').forEach(id => {
     $(`#${id}`)[ type === 'close' ? 'trigger' : 'triggerHandler'](`${type}.zf.trigger`, [el]);
   });
@@ -72,7 +68,7 @@ $(window).on('load', () => {
   checkListeners();
 });
 
-function checkListeners() {
+export function checkListeners() {
   eventsListener();
   resizeListener();
   scrollListener();
@@ -80,7 +76,7 @@ function checkListeners() {
 }
 
 //******** only fires this function once on load, if there's something to watch ********
-function closemeListener(pluginName) {
+export function closemeListener(pluginName) {
   var yetiBoxes = $('[data-yeti-box]'),
       plugNames = ['dropdown', 'tooltip', 'reveal'];
 
@@ -111,7 +107,7 @@ function closemeListener(pluginName) {
   }
 }
 
-function resizeListener(debounce){
+export function resizeListener(debounce){
   let timer,
       $nodes = $('[data-resize]');
   if($nodes.length){
@@ -133,7 +129,7 @@ function resizeListener(debounce){
   }
 }
 
-function scrollListener(debounce){
+export function scrollListener(debounce){
   let timer,
       $nodes = $('[data-scroll]');
   if($nodes.length){
@@ -155,7 +151,7 @@ function scrollListener(debounce){
   }
 }
 
-function eventsListener() {
+export function eventsListener() {
   if(!MutationObserver){ return false; }
   let nodes = document.querySelectorAll('[data-resize], [data-scroll], [data-mutate]');
 
@@ -206,5 +202,3 @@ function eventsListener() {
 Foundation.IHearYou = checkListeners;
 // Foundation.ISeeYou = scrollListener;
 // Foundation.IFeelYou = closemeListener;
-
-}(jQuery);
